@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{% block title %} Записи сообщества {{group.title}} {% endblock title %}
-{% block header %} {{group.title}} {% endblock header %}
+{% comment %} {% block title %} Записи сообщества {{group.title}} {% endblock title %}
+ {% endcomment %}{% block header %} {{group.title}} {% endblock header %}
 
 {% block context %}
     <h1> Записи сообщества {{ group.title }} </h1>
