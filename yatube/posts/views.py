@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import CreationForm
+from .forms import PostForm
 from .models import Group, Post
 from .utils import paginate_page
 
@@ -45,7 +45,7 @@ def post_detail(request, post_id):
 
 @login_required
 def post_create(request):
-    form = CreationForm(request.POST)
+    form = PostForm(request.POST)
     if form.is_valid():
         Post.objects.create(**form.cleaned_data, author=request.user)
         return redirect('posts:profile', request.user.username)
@@ -64,14 +64,14 @@ def post_edit(request, post_id):
         return redirect('posts:post_detail', post_id)
 
     if request.method == 'POST':
-        form = CreationForm(request.POST)
+        form = PostForm(request.POST)
         if form.is_valid():
             Post.objects.filter(id=post_id).update(
                 **form.cleaned_data,
             )
             return redirect('posts:post_detail', post_id)
     else:
-        form = CreationForm(instance=post)
+        form = PostForm(instance=post)
 
     context = {
         'form': form,
