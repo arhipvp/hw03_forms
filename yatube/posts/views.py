@@ -1,21 +1,14 @@
-import datetime
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import CreationForm
 from .models import Group, Post
-
-AMOUNT_POSTS: int = 10
+from .utils import paginate_page
 
 
 def index(request):
-    post_list = Post.objects.all()
-    paginator = Paginator(post_list, AMOUNT_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginate_page(request, Post.objects.all())
     context = {
         'page_obj': page_obj,
     }
@@ -24,9 +17,7 @@ def index(request):
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    paginator = Paginator(group.posts.all(), AMOUNT_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginate_page(request, group.posts.all())
     context = {
         'group': group,
         'page_obj': page_obj,
@@ -36,12 +27,7 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    paginator = Paginator(
-        Post.objects.filter(author=author).all(),
-        AMOUNT_POSTS,
-    )
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginate_page(request, author.posts.all())
     context = {
         'author': author,
         'page_obj': page_obj,
@@ -50,25 +36,19 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    # Здесь код запроса к модели и создание словаря контекста
     post = get_object_or_404(Post, id=post_id)
-    post_count = Post.objects.filter(author=post.author).count()
     context = {
         'post': post,
-        'post_count': post_count,
     }
     return render(request, 'posts/post_detail.html', context)
 
 
 @login_required
 def post_create(request):
-    if request.method == 'POST':
-        form = CreationForm(request.POST)
-        if form.is_valid():
-            Post.objects.create(**form.cleaned_data, author=request.user)
-            return redirect('posts:profile', request.user.username)
-    else:
-        form = CreationForm()
+    form = CreationForm(request.POST)
+    if form.is_valid():
+        Post.objects.create(**form.cleaned_data, author=request.user)
+        return redirect('posts:profile', request.user.username)
     context = {
         'form': form,
     }
@@ -77,18 +57,18 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
+
     post = get_object_or_404(Post, id=post_id)
+
     if post.author != request.user:
-        return redirect('posts:posts', post_id)
+        return redirect('posts:post_detail', post_id)
 
     if request.method == 'POST':
         form = CreationForm(request.POST)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.id = post_id
-            post.pub_date = datetime.datetime.now()
-            post.save()
+            Post.objects.filter(id=post_id).update(
+                **form.cleaned_data,
+            )
             return redirect('posts:post_detail', post_id)
     else:
         form = CreationForm(instance=post)
