@@ -7,7 +7,6 @@ User = get_user_model()
 
 
 class CreationForm(forms.ModelForm):
-
     class Meta:
         model = Post
         fields = ['text', 'group', ]
@@ -15,3 +14,7 @@ class CreationForm(forms.ModelForm):
             'text': forms.Textarea(attrs={'class': 'form-input', }),
             'group': forms.ChoiceField(required=False, )
         }
+
+
+class PostForm(forms.BaseForm):
+    'text'
