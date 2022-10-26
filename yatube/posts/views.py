@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
@@ -65,7 +66,7 @@ def post_edit(request, post_id):
 
     if post.author != request.user:
         return redirect('posts:post_detail', post_id)
-    
+
     form = PostForm(request.POST or None, instance=post)
     post = form.save(commit=False)
     post.author = request.user
@@ -73,7 +74,7 @@ def post_edit(request, post_id):
     if form.is_valid():
         post.save()
         return redirect('posts:post_detail', post_id)
-    
+
     context = {
         'form': form,
         'is_edit': True,
