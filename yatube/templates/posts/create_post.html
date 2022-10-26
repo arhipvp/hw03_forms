@@ -17,7 +17,12 @@
 {% endif %}
     " method="post">
 {% csrf_token %}
-{{ form.as_p }}
+{% for field in form  %}
+    <p>
+    {{ field.name }}
+    {{ field }}
+    </p>
+{% endfor %}
 <button type="submit" class="btn btn-primary">
     {% if is_edit %}
       Сохранить изменения

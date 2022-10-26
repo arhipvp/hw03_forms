@@ -2,7 +2,7 @@
 
 {% block context %}
     <h1> {{ group.title }} </h1>
-    <p> {{ group.description }} </p>
+    <p> {{ group.description | linebreaksbr }} </p>
     {% for post in page_obj %}
     <article>
     <ul>
@@ -15,7 +15,7 @@
         </li>
     </ul>
     </article>
-    <p> {{ post.text | linebreaksbr  }} </p>
+    <p> {{ post.text | linebreaksbr }} </p>
     {% if not forloop.last %} <hr> {% endif %}
 
     {% endfor %}

@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
@@ -47,7 +48,9 @@ def post_detail(request, post_id):
 def post_create(request):
     form = PostForm(request.POST)
     if form.is_valid():
-        Post.objects.create(**form.cleaned_data, author=request.user)
+        post = form.save(commit=False)
+        post.author = request.user
+        post.save()
         return redirect('posts:profile', request.user.username)
     context = {
         'form': form,
@@ -62,17 +65,15 @@ def post_edit(request, post_id):
 
     if post.author != request.user:
         return redirect('posts:post_detail', post_id)
-
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            Post.objects.filter(id=post_id).update(
-                **form.cleaned_data,
-            )
-            return redirect('posts:post_detail', post_id)
-    else:
-        form = PostForm(instance=post)
-
+    
+    form = PostForm(request.POST or None, instance=post)
+    post = form.save(commit=False)
+    post.author = request.user
+    post.pud_date = datetime.now()
+    if form.is_valid():
+        post.save()
+        return redirect('posts:post_detail', post_id)
+    
     context = {
         'form': form,
         'is_edit': True,
