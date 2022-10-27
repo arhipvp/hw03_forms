@@ -147,3 +147,4 @@ dmypy.json
 .history/
 
 .mypy_cache
+yatube/Sprint.py
